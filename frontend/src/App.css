@@ -1,0 +1,31 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+.App {
+  text-align: center;
+  padding: 10px;
+
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  background-color: aliceblue;
+  width: 100%;
+  height: ;
+}
+
+#map-container,
+map {
+  preserveaspectratio: "xMinYMin slice";
+  /* height: 70%; */
+  overflow: hidden;
+}
