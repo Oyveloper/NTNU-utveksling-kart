@@ -10,22 +10,26 @@ body,
   padding: 10px;
 
   height: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
 svg {
-  display: inline-block;
   vertical-align: middle;
   background-color: aliceblue;
-  width: 100%;
-  height: ;
+  aspect-ratio: xMidYMid meet;
+  max-width: 100%;
+  max-height: 100%;
 }
 
-#map-container,
-map {
-  preserveaspectratio: "xMinYMin slice";
+#map-container {
+  flex: 1;
+  height: 100px;
+}
+#map {
   /* height: 70%; */
-  overflow: hidden;
+  padding-bottom: 75%;
+  height: 100%;
 }

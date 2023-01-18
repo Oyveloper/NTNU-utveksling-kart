@@ -17,7 +17,7 @@ function App() {
   }, []);
 
   return (
-    <div className='App'>
+    <div className="App">
       <h1>Sjekk hvor mange som har vært på utveksling i hvert land!</h1>
       <Map countries={data} />
       <p>Øyvind Monsen, 2023</p>
