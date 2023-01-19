@@ -14,21 +14,21 @@ function Map(props) {
   const [hoverName, setHoverName] = useState("");
   const max = countries ? Math.max(...Object.values(countries)) : 0;
   const colorScale = scalePow()
-    .exponent(0.15)
+    .exponent(0.4)
     .domain([0, max])
     .range(["#cfebf4", "#20a2d5"]);
   return (
-    <div id='map-container'>
+    <div id="map-container">
       <Tooltip
-        anchorId='map'
+        anchorId="map"
         content={hoverName}
         float={true}
-        variant='info'
-        place='right'
+        variant="info"
+        place="right"
         noArrow
       />
 
-      <div id='map'>
+      <div id="map">
         <ComposableMap>
           <ZoomableGroup center={[0, 0]} zoom={1}>
             <Geographies geography={geoUrl}>

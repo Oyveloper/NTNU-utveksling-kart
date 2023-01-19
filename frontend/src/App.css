@@ -33,3 +33,19 @@ svg {
   padding-bottom: 75%;
   height: 100%;
 }
+
+form {
+  margin-bottom: 20px;
+}
+input {
+  padding: 10px;
+  border-radius: 5px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 10px;
+  border-radius: 5px;
+  border: 0;
+}

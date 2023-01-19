@@ -1,3 +1,4 @@
+from typing import Tuple
 import requests
 import pickle
 import pandas as pd
@@ -6,9 +7,9 @@ from deep_translator import GoogleTranslator
 import json
 from tqdm import tqdm
 
-from util import text_array_for_row, search_country
+from util import text_array_for_row
 
-from flask import request, jsonify
+from flask import Request
 import functions_framework
 from google.cloud import storage
 
@@ -23,7 +24,18 @@ def get_bucket():
 
 
 @functions_framework.http
-def stats(request: request):
+def main(r: Request) -> Tuple[str, int, dict]:
+    if r.path.startswith("/stats"):
+        return stats(r)
+    elif r.path.startswith("/update"):
+        return update_stats(r), 200, {}
+    else:
+        return "Not found", 404, {}
+
+
+def stats(request: Request) -> Tuple[str, int, dict]:
+    program = request.args.get("search")
+
     # Set CORS headers for the preflight request
     if request.method == "OPTIONS":
         # Allows GET requests from any origin with the Content-Type
@@ -39,13 +51,14 @@ def stats(request: request):
 
     bucket = get_bucket()
 
-    bucket.blob("data.pickle").download_to_filename("data.pickle")
-    bucket.blob("countries.pickle").download_to_filename("countries.pickle")
-    bucket.blob("country_counts.pickle").download_to_filename("country_counts.pickle")
-    stats: pd.DataFrame = pickle.load(open("data.pickle", "rb"))
-    countries: pd.DataFrame = pickle.load(open("country_counts.pickle", "rb"))
+    pickle_str = bucket.blob("data.pickle").download_as_string()
+    stats: pd.DataFrame = pickle.loads(pickle_str)
 
-    response = {"countries": countries.to_dict()}
+    if program is not None:
+        stats = stats[stats["Studieprogram"].str.contains(f"(?i){program}")]
+
+    countries = stats["Country_en"].value_counts()
+    response = countries.to_dict()
 
     # Set CORS headers for the main request
     headers = {"Access-Control-Allow-Origin": "*", "Content-Type": "application/json"}
@@ -60,8 +73,6 @@ def update_stats(event):
 
     countries_blob = bucket.blob("countries.pickle")
     data_blob = bucket.blob("data.pickle")
-    country_count_blob = bucket.blob("country_counts.pickle")
-    country_count_json_blob = bucket.blob("country_counts.json")
 
     countries_blob.download_to_filename("countries.pickle")
 
@@ -79,7 +90,7 @@ def update_stats(event):
         "home_institute": "",
         "exchange_program": "default",
         "exchange_period": "default",
-        "number-of-views": "1000",
+        "number-of-views": "1163",
         "advanced_search_enabled": "yes",
         "language": "no",
     }
@@ -94,33 +105,21 @@ def update_stats(event):
     )
     df = df.dropna()
 
-    print("Starting loop of cities to find all countries")
-    # Find all the cities from the data
-    cities = df["By"].unique()
-    for city in tqdm(cities):
-        if not city in countries:
-            countries[city] = search_country(city)
+    countries = df["Land"].unique()
+    countries_en = {}
 
-    df["Land"] = df.apply(lambda x: countries[x["By"]], axis=1)
-    counties_pickle = pickle.dumps(countries)
-    countries_blob.upload_from_string(counties_pickle)
+    # We want to translate all the country names into English for the site
+    translator = GoogleTranslator(source="no", target="en")
+    print("Translating country names")
+    for country in tqdm(countries):
+        en_country = translator.translate(country)
+        countries_en[country] = en_country
 
-    # We want to translate all the country names into Norwegian for the site
-    # translator = GoogleTranslator(source='auto', target='no')
-    # for city, country in countries.items():
-    # break
-    # if country is not None:
-    # countries[city] = translator.translate(country)
+    df["Country_en"] = df["Land"].map(countries_en)
+    df.loc[df["Land"] == "USA", "Country_en"] = "United States of America"
+    df.loc[df["Land"] == "Korea", "Country_en"] = "South Korea"
 
-    df.loc[df["Land"] == "United States", "Land"] = "United States of America"
     df.to_pickle("data.pickle")
     data_blob.upload_from_filename("data.pickle")
 
-    # Country counts
-    country_count = df["Land"].value_counts()
-
-    country_count.to_pickle("country_counts.pickle")
-    country_count_blob.upload_from_filename("country_counts.pickle")
-    country_count_json_blob.upload_from_string(country_count.to_json())
-
-    return "hello world"
+    return "Ok!"
