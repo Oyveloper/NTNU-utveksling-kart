@@ -20,7 +20,7 @@ function App() {
       .then((data) => {
         setData(data);
       });
-  }, [location]);
+  }, [search]);
 
   return (
     <div className="App">
