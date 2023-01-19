@@ -33,7 +33,8 @@ function App() {
         </a>{" "}
         over utvekslingsrapporter, og kan inneholde noen feil da ikke alle har
         skrevet rapport, og rapportene kun går tilbake til 2015. Du kan søke
-        etter ditt studieprogram under, eller la stå blankt for å se alle.
+        etter ditt studieprogram under, eller la feltet stå blankt for å se
+        alle.
       </p>
 
       <form>
