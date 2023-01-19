@@ -15,7 +15,7 @@ function App() {
   const [inputValue, setInputValue] = useState(search);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/stats/?search=${search}`)
+    fetch(`${BASE_URL}/stats/?search=${search | ""}`)
       .then((res) => res.json())
       .then((data) => {
         setData(data);
